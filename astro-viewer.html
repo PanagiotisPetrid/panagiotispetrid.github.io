@@ -102,12 +102,44 @@
             scene.add(model);
         });
 
-        // LISTEN FOR SCROLL DATA FROM WORDPRESS
+        // Add a floating text label to display progress (for debugging)
+        const debugLabel = document.createElement('div');
+        debugLabel.style.position = 'absolute';
+        debugLabel.style.bottom = '20px';
+        debugLabel.style.left = '20px';
+        debugLabel.style.color = '#FFCC00';
+        debugLabel.style.fontFamily = 'monospace';
+        debugLabel.style.fontSize = '24px';
+        debugLabel.style.background = 'rgba(0,0,0,0.7)';
+        debugLabel.style.padding = '10px 20px';
+        debugLabel.style.borderRadius = '8px';
+        debugLabel.style.zIndex = '100';
+        debugLabel.textContent = 'Waiting for scroll...';
+        document.body.appendChild(debugLabel);
+        
+        // Listen for scroll messages
         window.addEventListener('message', (event) => {
+            // Log to console
+            console.log('Message received:', event.data);
+            
             if (event.data.type === 'scrollSync') {
-                currentProgress = event.data.progress;
+                const progress = parseFloat(event.data.progress);
+                if (!isNaN(progress)) {
+                    // Update the debug label
+                    debugLabel.textContent = `Scroll Progress: ${(progress * 100).toFixed(1)}%`;
+                    
+                    // YOUR EXISTING LOGIC TO UPDATE THE ANIMATION
+                    // Assuming your variable is called 'currentProgress'
+                    window.currentProgress = progress; 
+                    
+                    // If you are using a THREE.js mixer, set the time directly:
+                    // if (mixer && clip) mixer.setTime(progress * clip.duration);
+                }
             }
         });
+
+// Also, try to request the progress immediately when the iframe loads
+window.parent.postMessage({ type: 'iframeReady' }, '*');
 
         function animate() {
             requestAnimationFrame(animate);
